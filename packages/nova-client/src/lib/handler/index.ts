@@ -57,14 +57,11 @@ export const buildHandler = (commands: Iterable<Command>) => {
 		event: APIInteraction,
 		reply?: (data: APIInteractionResponse) => void,
 	) => {
-		console.log('executing:', event.data);
 		if (event.type === InteractionType.ApplicationCommand) {
-			console.log('executing:', event.data);
 			const command = internal.get(event.data.name);
 
 			if (command) {
 				const data = await command.handler(event);
-				console.log('sending reply', data);
 
 				reply(data);
 			}

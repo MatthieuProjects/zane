@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "downlevelIteration": true,
+    "esModuleInterop": true,
     "incremental": true,
     "target": "es2015",
     "module": "esnext",

@@ -80,7 +80,7 @@ export type EventsFunctions = {
  */
 type ClientFunctions = EventsFunctions &
   TypedEmitter<EventsHandlerArguments> &
-  API;
+  Omit<API, "rest">;
 
 /**
  * The real extended class is an EventEmitter.
@@ -99,8 +99,8 @@ const undefinedClient: new () => ClientFunctions = EventEmitter as any;
 export class Client extends undefinedClient {
   public readonly rest: REST;
 
-  private readonly transport: Transport;
-  private readonly api: API;
+  private transport: Transport;
+  private api: API;
 
   constructor(options: {
     rest?: Partial<RESTOptions>;
@@ -132,10 +132,10 @@ export class Client extends undefinedClient {
       },
     });
 
-    this.transport = new Transport(self, options.transport);
+    self.transport = new Transport(self, options.transport);
 
     // This is safe because this event is emitted by the EventEmitter itself.
-    this.on('newListener' as any, async (event: EventName) => {
+    self.on('newListener' as any, async (event: EventName) => {
       await this.transport.subscribe(event);
     });
 

@@ -67,7 +67,6 @@ export class Transport {
   public async subscribe(event: EventName) {
     // If nats is not connected, we simply request to subscribe to it at startup
     if (!this.nats) {
-      console.log("Requesting event " + event);
       this.events.add(event);
       return;
     }
@@ -109,7 +108,6 @@ export class Transport {
           continue;
         }
 
-        console.log(`unsubscribing from ${key}`);
         subsciption.unsubscribe();
       }
     }
@@ -124,7 +122,6 @@ export class Transport {
       throw new Error("nats connection is not started");
     }
 
-    console.log(`subscribing to ${topic}`);
     // Create the nats subscription
     const subscription = this.nats.subscribe(topic, {
       queue: this.config.queue || "nova_consumer",
