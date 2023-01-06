@@ -1,0 +1,21 @@
+{
+  "name": "infra",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "packages/infra/src",
+  "targets": {
+    "plan": {
+      "executor": "@nx-extend/terraform:plan",
+      "options": {}
+    },
+    "initialize": {
+      "executor": "@nx-extend/terraform:init",
+      "options": {}
+    },
+    "apply": {
+      "executor": "@nx-extend/terraform:apply",
+      "options": {}
+    }
+  },
+  "tags": []
+}

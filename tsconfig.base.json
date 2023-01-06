@@ -1,0 +1,22 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "incremental": true,
+    "target": "es2015",
+    "module": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@zane/js-proto": ["packages/js-proto/src/index.ts"],
+      "@zane/nova-client": ["packages/nova-client/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
