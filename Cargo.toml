@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "packages/rs-proto",
-    "packages/proto"
+    "packages/game-manager",
+    "packages/game-manager-api"
 ]
