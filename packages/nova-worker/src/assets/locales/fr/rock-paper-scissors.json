@@ -1,4 +1,28 @@
 {
     "name": "pierre-feuille-ciseaux",
-    "description": "Jouez à pierre feuille ciseaux contre vos amis ou contre une IA!"
+    "description": "Jouez à pierre feuille ciseaux contre vos amis ou contre une IA!",
+    "fields": {
+        "opponent": {
+            "name": "opposant",
+            "description": "Votre opposant pour ce combat!"
+        },
+        "rounds": {
+            "name": "tours",
+            "description": "Nompre de tous à exécuter."
+        }
+    },
+    "cantPlayWithYourself": "Vous ne pouvez pas jouer contre vous même",
+    "embed": {
+        "title": "Pierre Feuille Ciseaux",
+        "description": "Welcome to Rock Paper Scissors, please select your choice below\n \\:rock: \\:newspaper: or \\:scissors: ?"
+    },
+    "waitingForOpponent": "En attente de votre opposant",
+    "items": {
+        "rock": "Pierre",
+        "paper": "Feuille",
+        "scissors": "Ciseaux"
+    },
+    "alreadyResponded": "Vous avez déja joué pendant ce tour.",
+    "wonMessage": "<@{{userId}}> à gagné! <@{{otherUser}}> à choisi {{otherResponse}}",
+    "tieMessage": "Egalité! Vous avez tout les deux répondu {{response}}"
 }

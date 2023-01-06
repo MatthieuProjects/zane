@@ -1,18 +1,18 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from 'node:buffer';
 import {
   connect,
   type ConnectionOptions,
   type NatsConnection,
   type Subscription,
-} from "nats";
-import globRegex from "glob-regex";
+} from 'nats';
+import globRegex from 'glob-regex';
 import {
   type APIInteractionResponse,
   type GatewayDispatchPayload,
   Routes,
-} from "discord-api-types/v10";
-import { type CamelCase } from "type-fest";
-import { type Client, type EventName, type EventsHandlerArguments } from ".";
+} from 'discord-api-types/v10';
+import { type CamelCase } from 'type-fest';
+import { type Client, type EventName, type EventsHandlerArguments } from '.';
 
 /**
  * Options for the nats transport layer
@@ -73,7 +73,7 @@ export class Transport {
 
     // Since the event names used by this library are camelCase'd we need to
     // re-transform it to the UPPER_CASE used by nova.
-    const dashed = event.replace(/[A-Z]/g, (m) => "_" + m.toLowerCase());
+    const dashed = event.replace(/[A-Z]/g, (m) => '_' + m.toLowerCase());
     // Construct the topic name used by nova.
     // This **is going to change** as we implement the caching component.
     const topic = `nova.cache.dispatch.${dashed.toUpperCase()}`;
@@ -95,7 +95,7 @@ export class Transport {
 
     // We abord the subscriptions if it's already covered.
     if (isAlreadyPresent) {
-      console.warn("nats subscription already covered.");
+      console.warn('nats subscription already covered.');
       return;
     }
 
@@ -119,13 +119,11 @@ export class Transport {
   // It also listens for a subscription end.
   private async _subscriptionTask(topic: string) {
     if (!this.nats) {
-      throw new Error("nats connection is not started");
+      throw new Error('nats connection is not started');
     }
 
     // Create the nats subscription
-    const subscription = this.nats.subscribe(topic, {
-      queue: this.config.queue || "nova_consumer",
-    });
+    const subscription = this.nats.subscribe(topic, {});
     this.subscriptions.set(topic, subscription);
     // Handle each event in the subscription stream.
     for await (const publish of subscription) {
@@ -133,7 +131,7 @@ export class Transport {
         // Decode the payload
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const event: GatewayDispatchPayload = JSON.parse(
-          Buffer.from(publish.data).toString("utf8")
+          Buffer.from(publish.data).toString('utf8')
         );
         // Transform the event name to a camclCased name
         const camelCasedName = event.t
@@ -146,11 +144,11 @@ export class Transport {
         // we need to handle the case where nova is not configured
         // with a webhook endpoint, hence we need to use a post request
         // against webhook execute endpoint with the interaction data.
-        if (event.t === "INTERACTION_CREATE") {
+        if (event.t === 'INTERACTION_CREATE') {
           const interaction = event.d;
           const respond = async (respond: APIInteractionResponse) => {
             if (publish.reply) {
-              publish.respond(Buffer.from(JSON.stringify(respond), "utf8"));
+              publish.respond(Buffer.from(JSON.stringify(respond), 'utf8'));
             } else {
               await this.emitter.rest.post(
                 Routes.interactionCallback(interaction.id, interaction.token),

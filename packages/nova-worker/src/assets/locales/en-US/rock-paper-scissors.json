@@ -10,5 +10,19 @@
             "name": "rounds",
             "description": "Number of rounds this game should have"
         }
-    }
+    },
+    "cantPlayWithYourself": "You can't play this game against yourself.",
+    "embed": {
+        "title": "Rock Paper Scissors",
+        "description": "Welcome to Rock Paper Scissors, please select your choice below\n :rock: :newspaper: or :scissors: ?"
+    },
+    "waitingForOpponent": "Now waiting for your opponent.",
+    "items": {
+        "rock": "rock",
+        "paper": "paper",
+        "scissors": "scissors"
+    },
+    "alreadyResponded": "You already responded in this round.",
+    "wonMessage": "<@{{userId}}> won! <@{{otherUser}}> chosen {{otherResponse}}",
+    "tieMessage": "You both selected {{response}}"
 }

@@ -11,6 +11,9 @@ i18next.use(Backend).init({
   preload: ['fr', 'en-US'],
   saveMissing: true,
   ns: ['zane-bot'],
+  interpolation: {
+    skipOnVariables: false
+  },
   defaultNS: 'zane-bot',
   backend: {
     loadPath: join(__dirname, './assets/locales/{{lng}}/{{ns}}.json'),

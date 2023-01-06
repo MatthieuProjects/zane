@@ -1,18 +1,28 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {type Command, type HandlerFn} from '.';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { ComponentHandlerFn, type Command, type ChatInputHandlerFn } from '.';
 
 /**
  * Simple wrapper around the SlashCommandBuilder provided by Discord.js
  */
 export class CommandBuilder extends SlashCommandBuilder {
-	private _handler: HandlerFn;
+  private _handler: ChatInputHandlerFn;
+  private _componentsHandler: Record<string, ComponentHandlerFn> = {};
 
-	handler(handler: HandlerFn): this {
-		this._handler = handler;
-		return this;
-	}
+  setChatInputHandler(handler: ChatInputHandlerFn): this {
+    this._handler = handler;
+    return this;
+  }
 
-	build(): Command {
-		return {json: this.toJSON(), handler: this._handler};
-	}
+  addComponentHandler(name: string, handler: ComponentHandlerFn): this {
+    this._componentsHandler[name] = handler;
+    return this;
+  }
+
+  build(): Command {
+    return {
+      json: this.toJSON(),
+      chatInputHandler: this._handler,
+      componentHandlers: this._componentsHandler,
+    };
+  }
 }
