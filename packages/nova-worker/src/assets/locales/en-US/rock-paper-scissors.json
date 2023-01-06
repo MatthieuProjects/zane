@@ -1,0 +1,14 @@
+{
+    "name": "rock-paper-scissors",
+    "description": "Play rock-paper-scissors against a friend or against an AI!",
+    "fields": {
+        "opponent": {
+            "name": "opponent",
+            "description": "Your opponent for this battle!"
+        },
+        "rounds": {
+            "name": "rounds",
+            "description": "Number of rounds this game should have"
+        }
+    }
+}
