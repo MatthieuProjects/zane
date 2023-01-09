@@ -6,4 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-game_manager_api = { path = "../game-manager-api" }
+mlua = { version = "0.8.7", features = ["luajit", "macros", "vendored"] }
+
+tokio = { version = "1", features = ["rt"] }
+async-nats = "0.26.0"
+serde = "1.0.152"
+serde_json = "1.0.91"
+walkdir = "2"

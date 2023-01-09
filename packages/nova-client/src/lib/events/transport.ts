@@ -163,7 +163,7 @@ export class Transport {
           this.emitter.emit(
             camelCasedName,
             { ...event.d, client: this.emitter },
-            respond as never
+            respond
           );
         } else {
           // Typescript refuses to infer this, whyyy

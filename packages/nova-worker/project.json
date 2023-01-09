@@ -70,6 +70,19 @@
             "type=sha,prefix=sha-"
           ]
         }
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/nova-worker/src/environments/environment.ts",
+              "with": "packages/nova-worker/src/environments/environment.prod.ts"
+            }
+          ]
+        }
       }
     }
   },
