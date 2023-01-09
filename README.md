@@ -8,7 +8,7 @@ Zane is based on [Nova](https://github.com/discordnova/nova) and features a dist
 
 | Component    | Description                                         | Language   |
 |--------------|-----------------------------------------------------|------------|
-| nova-worker  | Dispatch game events and process interaction events | TypeScript |
+| zane-worker  | Dispatch game events and process interaction events | TypeScript |
 | game-manager | Stores the games states and hangle gameplay events  | Rust       |
 
 Each game is developped with [Trzl](https://github.com/teal-language/tl) and is run wihin a sandbox in game-manager.

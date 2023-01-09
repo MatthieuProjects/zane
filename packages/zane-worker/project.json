@@ -1,7 +1,7 @@
 {
-  "name": "nova-worker",
+  "name": "zane-worker",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/nova-worker/src",
+  "sourceRoot": "packages/zane-worker/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,10 +10,10 @@
       "options": {
         "target": "node",
         "compiler": "tsc",
-        "outputPath": "dist/packages/nova-worker",
-        "main": "packages/nova-worker/src/main.ts",
-        "tsConfig": "packages/nova-worker/tsconfig.app.json",
-        "assets": ["packages/nova-worker/src/assets"]
+        "outputPath": "dist/packages/zane-worker",
+        "main": "packages/zane-worker/src/main.ts",
+        "tsConfig": "packages/zane-worker/tsconfig.app.json",
+        "assets": ["packages/zane-worker/src/assets"]
       },
       "configurations": {
         "production": {
@@ -22,8 +22,8 @@
           "inspect": false,
           "fileReplacements": [
             {
-              "replace": "packages/nova-worker/src/environments/environment.ts",
-              "with": "packages/nova-worker/src/environments/environment.prod.ts"
+              "replace": "packages/zane-worker/src/environments/environment.ts",
+              "with": "packages/zane-worker/src/environments/environment.prod.ts"
             }
           ]
         }
@@ -32,11 +32,11 @@
     "serve": {
       "executor": "@nrwl/js:node",
       "options": {
-        "buildTarget": "nova-worker:build"
+        "buildTarget": "zane-worker:build"
       },
       "configurations": {
         "production": {
-          "buildTarget": "nova-worker:build:production"
+          "buildTarget": "zane-worker:build:production"
         }
       }
     },
@@ -44,14 +44,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/nova-worker/**/*.ts"]
+        "lintFilePatterns": ["packages/zane-worker/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/nova-worker/jest.config.ts",
+        "jestConfig": "packages/zane-worker/jest.config.ts",
         "passWithNoTests": true
       }
     },
@@ -60,7 +60,7 @@
       "options": {
         "engine": "docker",
         "metadata": {
-          "images": ["zane/nova-worker"],
+          "images": ["zane/zane-worker"],
           "load": true,
           "tags": [
             "type=schedule",
@@ -78,8 +78,8 @@
           "inspect": false,
           "fileReplacements": [
             {
-              "replace": "packages/nova-worker/src/environments/environment.ts",
-              "with": "packages/nova-worker/src/environments/environment.prod.ts"
+              "replace": "packages/zane-worker/src/environments/environment.ts",
+              "with": "packages/zane-worker/src/environments/environment.prod.ts"
             }
           ]
         }
