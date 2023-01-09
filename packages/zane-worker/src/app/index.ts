@@ -18,10 +18,13 @@ export class Zane extends Client {
   });
 
   constructor() {
+    const nats = process.env.NATS || 'localhost';
+    const api = process.env.API || 'http://localhost:8090/api';
+
     super({
-      transport: { queue: 'zane-worker', nats: { servers: ['localhost'] } },
+      transport: { queue: 'zane-worker', nats: { servers: [nats] } },
       rest: {
-        api: 'http://localhost:8090/api',
+        api,
       },
     });
 
