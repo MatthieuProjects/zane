@@ -1,7 +1,7 @@
 import { Locale } from 'discord-api-types/v10';
 import i18next from 'i18next';
 
-let locales = [];
+const locales = [];
 for (const locale in Locale) {
   locales.push(Locale[locale]);
 }

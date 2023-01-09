@@ -28,7 +28,7 @@ fn list_games(lua: &Lua, _: ()) -> LuaResult<LuaValue> {
                 .file_name()
                 .to_str()
                 .unwrap()
-                .replace("/", ".")
+                .replace('/', ".")
                 .replace(".lua", "");
             table.push(module)?;
         }

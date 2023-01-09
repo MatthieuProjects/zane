@@ -86,7 +86,7 @@ export const buildHandler = (commands: Iterable<Command>) => {
       }
     } else if (event.type === InteractionType.MessageComponent) {
       console.log('handling component event!', event.data.custom_id);
-      let parsed = parseCustomId(event.data.custom_id);
+      const parsed = parseCustomId(event.data.custom_id);
       if (parsed) {
         const { command: commandName, name, state } = parsed;
         const command = internal.get(commandName);
@@ -109,14 +109,14 @@ export const buildHandler = (commands: Iterable<Command>) => {
   };
 };
 
-let parseCustomId = (
+const parseCustomId = (
   customId: string
 ): { name: string; command: string; state: string } | null => {
-  let customIdRegexpr = /(.+)\$(.+)\#(.+)/g;
-  let parse = customIdRegexpr.exec(customId);
+  const customIdRegexpr = /(.+)\$(.+)#(.+)/g;
+  const parse = customIdRegexpr.exec(customId);
 
   if (parse) {
-    let [, command, name, state] = parse;
+    const [, command, name, state] = parse;
     return { name, command, state };
   } else {
     console.log("failed parsing", customId, parse);

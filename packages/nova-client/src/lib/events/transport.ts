@@ -172,7 +172,9 @@ export class Transport {
             client: this.emitter,
           } as any);
         }
-      } catch {}
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 }

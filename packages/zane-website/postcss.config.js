@@ -1,6 +1,6 @@
 module.exports = {
   plugins: {
-    tailwindcss: {},
+    tailwindcss: { config: './packages/zane-website/tailwind.config.cjs' },
     autoprefixer: {},
   },
 }

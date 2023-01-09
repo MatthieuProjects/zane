@@ -111,7 +111,7 @@ export class Client extends undefinedClient {
     this.api = new API(this.rest);
 
     // Using a proxy to provide the 'on...' functionality
-    let self = new Proxy(this, {
+    const self = new Proxy(this, {
       get(self, symbol: keyof typeof Client) {
         const name = symbol.toString();
         if (name.startsWith('on') && name.length > 2) {

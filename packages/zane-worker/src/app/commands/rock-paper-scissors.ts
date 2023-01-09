@@ -25,12 +25,12 @@ const handler: ChatInputHandlerFn = async ({
   const ctx = i18next.cloneInstance();
   ctx.changeLanguage(event.locale);
 
-  let opponent1 = event.user || event.member.user;
-  let opponentOption = event.data.options.find(
+  const opponent1 = event.user || event.member.user;
+  const opponentOption = event.data.options.find(
     ({ name }) => name === 'opponent'
   );
   if (opponentOption.type !== ApplicationCommandOptionType.User) return;
-  let opponent2 = (event.data.resolved as APIInteractionDataResolved).users[
+  const opponent2 = (event.data.resolved as APIInteractionDataResolved).users[
     opponentOption.value
   ];
 
@@ -96,9 +96,9 @@ const handleInput: ComponentHandlerFn = async (
   const ctx = i18next.cloneInstance();
   ctx.changeLanguage(event.locale);
 
-  let game = states[gameId];
+  const game = states[gameId];
 
-  let user = event.user || event.member.user;
+  const user = event.user || event.member.user;
   if (
     !game ||
     event.data.component_type !== ComponentType.StringSelect ||
@@ -115,8 +115,8 @@ const handleInput: ComponentHandlerFn = async (
     };
   }
 
-  let response = event.data.values[0] as Response;
-  let playerId = game.players.indexOf(user.id);
+  const response = event.data.values[0] as Response;
+  const playerId = game.players.indexOf(user.id);
 
   if (game.responses[playerId]) {
     return {
