@@ -1,76 +1,85 @@
-use std::env::current_dir;
+use std::collections::HashMap;
+use std::str::FromStr;
 
-use mlua::chunk;
-use mlua::prelude::*;
-use mlua::{Lua, LuaOptions, StdLib};
-use walkdir::WalkDir;
-
-fn used_memory(lua: &Lua, _: ()) -> LuaResult<usize> {
-    Ok(lua.used_memory())
-}
-
-fn print(_: &Lua, arg: String) -> LuaResult<LuaValue> {
-    println!("lua: {}", arg);
-
-    Ok(LuaValue::Nil)
-}
-
-fn list_games(lua: &Lua, _: ()) -> LuaResult<LuaValue> {
-    let table = lua.create_table()?;
-    for file in WalkDir::new("./games")
-        .into_iter()
-        .filter_map(|file| file.ok())
-    {
-        if file.metadata().unwrap().is_file()
-            && file.file_name().to_str().unwrap().ends_with(".lua")
-        {
-            let module = file
-                .file_name()
-                .to_str()
-                .unwrap()
-                .replace('/', ".")
-                .replace(".lua", "");
-            table.push(module)?;
-        }
-    }
-
-    Ok(LuaValue::Table(table))
-}
-
-fn build_api_table(lua: &Lua) -> LuaResult<LuaTable> {
-    let table = lua.create_table()?;
-
-    table.set("print", lua.create_function(print)?)?;
-    table.set("used_memory", lua.create_function(used_memory)?)?;
-    table.set("list_games", lua.create_function(list_games)?)?;
-    table.set("version", "0.0")?;
-
-    Ok(table)
-}
+use game_manager::lua;
+use game_manager::lua::data::{GameEvent, IntializationData};
+use lua::LuaRuntime;
+use tracing_subscriber::filter::Directive;
+use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{fmt, util::SubscriberInitExt};
 
 fn main() {
-    let runtime = Lua::new_with(StdLib::ALL_SAFE, LuaOptions::default()).unwrap();
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(Directive::from_str("info").unwrap())
+                .from_env()
+                .unwrap(),
+        )
+        .init();
 
-    runtime
-        .globals()
-        .set("zane_native", build_api_table(&runtime).unwrap())
+    let rt = LuaRuntime::new().unwrap();
+
+    let game = rt
+        .initialize_game(
+            "guess-the-number".to_string(),
+            IntializationData {
+                users: vec!["user1".to_string(), "user2".to_string()],
+            },
+        )
         .unwrap();
 
-    let current_folder = current_dir()
-        .unwrap()
-        .as_path()
-        .to_owned()
-        .to_str()
-        .unwrap()
-        .to_string();
+    let mut data = HashMap::new();
+    data.insert("number".to_string(), "1".to_string());
 
-    let path = format!("{cwd}/games/?.lua;{cwd}/lib/?.lua", cwd = current_folder);
+    rt.handle_event(
+        "guess-the-number".to_string(),
+        GameEvent {
+            data: data,
+            user: "user1".to_string(),
+            game: game.clone(),
+        },
+    )
+    .unwrap();
 
-    runtime
-        .load(chunk!(
-            package.path = $path
-            require "zane.runtime"
-        ))
-        .exec()
-        .unwrap();
+    let mut data = HashMap::new();
+    data.insert("number".to_string(), "5".to_string());
+
+    rt.handle_event(
+        "guess-the-number".to_string(),
+        GameEvent {
+            data: data,
+            user: "user2".to_string(),
+            game: game.clone(),
+        },
+    )
+    .unwrap();
+
+    let mut data = HashMap::new();
+    data.insert("number".to_string(), "0".to_string());
+
+    rt.handle_event(
+        "guess-the-number".to_string(),
+        GameEvent {
+            data: data,
+            user: "user2".to_string(),
+            game: game.clone(),
+        },
+    )
+    .unwrap();
+
+    let mut data = HashMap::new();
+    data.insert("number".to_string(), "0".to_string());
+
+    rt.handle_event(
+        "guess-the-number".to_string(),
+        GameEvent {
+            data: data,
+            user: "user1".to_string(),
+            game: game.clone(),
+        },
+    )
+    .unwrap();
 }

@@ -42,7 +42,7 @@ resource "kubernetes_stateful_set" "zane_agent" {
 
           env {
             name  = "API"
-            value = "http://nova-rest.zane.svc.cluster.local:8080/api/"
+            value = "http://nova-rest.zane.svc.cluster.local:8080/api"
           }
         }
       }

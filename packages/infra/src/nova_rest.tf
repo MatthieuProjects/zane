@@ -18,10 +18,13 @@ resource "kubernetes_deployment" "nova_rest" {
       }
       spec {
         container {
-          image = "ghcr.io/discordnova/nova/rest:latest@sha256:2d3eb4a930c6a9fe18070c891a66bc1d6deb2abc23f1485ebb942e4b8c72ce64"
-          name  = "rest"
+          image_pull_policy = "Always"
+          image             = "ghcr.io/discordnova/nova/rest:latest@sha256:27fea77181df9a208de8e4d381f7ec7e5f956d6e3545e2797174021eb12f1b12"
+          name              = "rest"
           port {
             container_port = 8080
+            name           = "http"
+            protocol       = "TCP"
           }
           volume_mount {
             name       = "config"
@@ -30,6 +33,20 @@ resource "kubernetes_deployment" "nova_rest" {
           env_from {
             secret_ref {
               name = kubernetes_secret.nova_credentials.metadata.0.name
+            }
+          }
+
+          readiness_probe {
+            http_get {
+              path = "/api/users/@me"
+              port = "http"
+            }
+          }
+
+          liveness_probe {
+            http_get {
+              path = "/api/users/@me"
+              port = "http"
             }
           }
         }
@@ -54,11 +71,12 @@ resource "kubernetes_service" "nova_rest_service" {
     selector = {
       app = kubernetes_deployment.nova_rest.spec.0.template.0.metadata.0.labels.app
     }
-    type = "NodePort"
+    type = "ClusterIP"
     port {
       port        = 8080
       target_port = 8080
       name        = "http"
+      protocol    = "TCP"
     }
   }
 }

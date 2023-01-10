@@ -5,7 +5,7 @@ resource "kubernetes_stateful_set" "nova_ratelimit" {
   }
 
   spec {
-    replicas = 3
+    replicas     = 3
     service_name = "nova-ratelimit"
     selector {
       match_labels = {
@@ -21,12 +21,15 @@ resource "kubernetes_stateful_set" "nova_ratelimit" {
       }
       spec {
         container {
-          image = "ghcr.io/discordnova/nova/ratelimit:latest@sha256:c4a840c20fc21cf4ad0ee84ce50e60cfc860efe9cfc40d344e3ff75433d134e9"
-          name  = "nova-ratelimit"
+
+          image_pull_policy = "Always"
+          image             = "ghcr.io/discordnova/nova/ratelimit:latest@sha256:32fab4f86bb4bd820fec586452254c4944e7372da4873befc44b06cd8c5f6657"
+          name              = "nova-ratelimit"
 
           port {
-            name = "grpc"
+            name           = "grpc"
             container_port = 8080
+            protocol       = "TCP"
           }
 
           liveness_probe {
@@ -43,12 +46,12 @@ resource "kubernetes_stateful_set" "nova_ratelimit" {
 
           resources {
             limits = {
-              "cpu": "50m",
-              "memory": "200M"
+              "cpu" : "50m",
+              "memory" : "200M"
             }
             requests = {
-              "cpu": "10m",
-              "memory": "100M"
+              "cpu" : "10m",
+              "memory" : "100M"
             }
           }
 
@@ -59,7 +62,7 @@ resource "kubernetes_stateful_set" "nova_ratelimit" {
           }
 
           volume_mount {
-            name = "config"
+            name       = "config"
             mount_path = "/config"
           }
         }
@@ -77,7 +80,7 @@ resource "kubernetes_stateful_set" "nova_ratelimit" {
 
 resource "kubernetes_service" "nova_ratelimit" {
   metadata {
-    name = "nova-ratelimit"
+    name      = "nova-ratelimit"
     namespace = kubernetes_namespace.zane.metadata.0.name
   }
 
@@ -86,10 +89,12 @@ resource "kubernetes_service" "nova_ratelimit" {
     selector = {
       app = kubernetes_stateful_set.nova_ratelimit.spec.0.template.0.metadata.0.labels.app
     }
-  
+
     port {
-      port = 8080
-      name = "grpc"
+      port        = 8080
+      target_port = 8080
+      name        = "grpc"
+      protocol    = "TCP"
     }
   }
 }

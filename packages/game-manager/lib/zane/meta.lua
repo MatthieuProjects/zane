@@ -1,5 +1,6 @@
+local native = require("zane.native")
 local meta = {}
 
-meta.version = zane_native.version
+meta.version = native.version
 
 return meta

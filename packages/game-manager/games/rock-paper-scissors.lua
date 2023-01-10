@@ -1,5 +1,15 @@
 local utils = require("zane.utils")
 local meta = require("zane.meta")
 
---- todo: Implementing the rock-paper-scissors state machine
+--- Rock Paper Scissors State machine overview
+--- 
+--- State Enum:
+---     waiting-for-data { choises: [value?, value?] }
+---     ended { winner: [user], choises: [value, value] }
+---     
+---     waiting-for-data
+---           | (state transition event = input-data)
+---     waiting-for-data
+---           | (state transition event = input-data)
+---         ended
 

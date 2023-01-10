@@ -75,5 +75,6 @@ resource "kubernetes_secret" "nova_credentials" {
     "NOVA__REST__DISCORD__TOKEN"         = var.discord_token,
     "NOVA__WEBHOOK__DISCORD__PUBLIC_KEY" = var.discord_public_key,
     "NOVA__WEBHOOK__DISCORD__CLIENT_ID"  = var.discord_client_id,
+    "RUST_LOG" = "debug"
   }
 }
