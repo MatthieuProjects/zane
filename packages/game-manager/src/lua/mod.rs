@@ -7,9 +7,11 @@ use mlua::chunk;
 use mlua::prelude::*;
 use mlua::StdLib;
 use tracing::debug;
+use tracing::info;
+use walkdir::WalkDir;
 
 use self::api::build_api_table;
-use self::data::GameData;
+use self::data::Game;
 use self::data::GameEvent;
 use self::data::IntializationData;
 use self::storelog::GameState;
@@ -20,12 +22,12 @@ mod storelog;
 
 pub struct LuaRuntime {
     rt: Lua,
+    thread: LuaRegistryKey,
 }
 
 impl LuaRuntime {
     pub fn new() -> anyhow::Result<Self> {
         let runtime = Lua::new_with(StdLib::ALL_SAFE, LuaOptions::default())?;
-
         // Register our native module
         runtime
             .globals()
@@ -40,40 +42,60 @@ impl LuaRuntime {
             .ok_or_else(|| anyhow!("current direcory is not a string"))?
             .to_string();
 
-        let path = format!("{cwd}/games/?.lua;{cwd}/lib/?.lua", cwd = current_folder);
-
+        let path = format!("{cwd}/?.lua", cwd = current_folder);
         debug!("using lua path {}", path);
 
-        let data = Self { rt: runtime };
-
-        data.rt
+        runtime
             .load(chunk!(
                 package.path = $path
                 require "zane.runtime"
             ))
             .exec()?;
 
-        data.rt.globals().set(
-            "__handle",
-            Lua::create_thread(
-                &data.rt,
-                data.rt
-                    .globals()
-                    .get::<_, LuaTable>("package")?
-                    .get::<_, LuaTable>("loaded")?
-                    .get::<_, LuaTable>("zane.runtime")?
-                    .get::<_, LuaFunction>("consume_events_stream")?,
-            )?,
+        for file in WalkDir::new("./games")
+            .into_iter()
+            .filter_map(|file| file.ok())
+        {
+            if file.metadata().unwrap().is_file()
+                && file.file_name().to_str().unwrap().ends_with(".lua")
+            {
+                let module = file
+                    .path()
+                    .to_str()
+                    .unwrap()
+                    .replace("./", "")
+                    .replace('/', ".")
+                    .replace(".lua", "");
+                info!("loading module {}", module);
+                runtime
+                    .load(chunk!(
+                        require($module)
+                    ))
+                    .exec()?;
+            }
+        }
+        let thread = Lua::create_thread(
+            &runtime,
+            runtime
+                .globals()
+                .get::<_, LuaTable>("package")?
+                .get::<_, LuaTable>("loaded")?
+                .get::<_, LuaTable>("zane.runtime")?
+                .get::<_, LuaFunction>("consume_events_stream")?,
         )?;
+        let registry_key = runtime.create_registry_value(thread)?;
 
-        Ok(data)
+        Ok(Self {
+            rt: runtime,
+            thread: registry_key,
+        })
     }
 
     pub fn initialize_game(
         &self,
         game: String,
         initialization_data: IntializationData,
-    ) -> anyhow::Result<GameData> {
+    ) -> anyhow::Result<Game> {
         let method = self
             .rt
             .globals()
@@ -82,7 +104,7 @@ impl LuaRuntime {
             .get::<_, LuaTable>("zane.runtime")?
             .get::<_, LuaFunction>("initialize_state")?;
 
-        let state = GameData {
+        let state = Game {
             state: Arc::new(Mutex::new(GameState::default())),
             initialization_data: Arc::new(Mutex::new(initialization_data)),
         };
@@ -93,7 +115,7 @@ impl LuaRuntime {
     }
 
     pub fn handle_event(&self, game: String, event: GameEvent) -> anyhow::Result<()> {
-        let thread: LuaThread = self.rt.globals().raw_get("__handle")?;
+        let thread: LuaThread = self.rt.registry_value(&self.thread)?;
         thread.resume::<_, ()>((game, event))?;
         Ok(())
     }

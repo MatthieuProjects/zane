@@ -1,18 +1,19 @@
 use mlua::prelude::*;
 use mlua::{MetaMethod, UserData};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::mem::take;
 use tracing::debug;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct UpdateBlock {
     pub name: String,
     pub field_updates: HashMap<String, String>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct GameState {
-    current: HashMap<String, String>,
+    pub current: HashMap<String, String>,
     current_updates: HashMap<String, String>,
     logs: Vec<UpdateBlock>,
 }
@@ -64,10 +65,8 @@ impl UserData for GameState {
         });
 
         methods.add_method_mut("debug", |_, this, _: ()| {
-            println!("{:#?}", this);
+            debug!("{:#?}", this);
             Ok(())
         });
-
-        methods.add_meta_function(MetaMethod::Call, |_, _: ()| Ok(GameState::default()));
     }
 }

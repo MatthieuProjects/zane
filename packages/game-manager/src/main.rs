@@ -1,15 +1,20 @@
-use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 
+use bytes::Bytes;
 use game_manager::lua;
-use game_manager::lua::data::{GameEvent, IntializationData};
+use game_manager::lua::data::{GameEvent, GameEventSerialized, IntializationData};
 use lua::LuaRuntime;
+use tokio::task::{spawn_local, LocalSet};
+use tokio_stream::StreamExt;
+use tracing::info;
 use tracing_subscriber::filter::Directive;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::{fmt, util::SubscriberInitExt};
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(fmt::layer())
         .with(
@@ -20,66 +25,74 @@ fn main() {
         )
         .init();
 
-    let rt = LuaRuntime::new().unwrap();
+    let rt = Arc::new(LuaRuntime::new().unwrap());
+    let nats = async_nats::connect("localhost").await?;
 
-    let game = rt
-        .initialize_game(
-            "guess-the-number".to_string(),
-            IntializationData {
-                users: vec!["user1".to_string(), "user2".to_string()],
-            },
-        )
+    let mut sub = nats
+        .subscribe("zane.matchmake.initialize".to_string())
+        .await
         .unwrap();
 
-    let mut data = HashMap::new();
-    data.insert("number".to_string(), "1".to_string());
+    let local = LocalSet::new();
+    local
+        .run_until(async move {
+            while let Some(message) = sub.next().await {
+                println!("data: {:?}", message.payload);
+                let a: IntializationData = serde_json::from_slice(&message.payload).unwrap();
+                info!("scheduling game {:?}", a);
+                let game_id = a.game_id.clone();
+                let game_type = a.game_type.clone();
+                let game_data = rt.initialize_game(a.game_type.clone(), a).unwrap();
+                let rta = rt.clone();
+                let nats = nats.clone();
+                let mut subscription = nats
+                    .subscribe(format!("zane.game.{}", game_id))
+                    .await
+                    .unwrap();
+                if let Some(reply) = message.reply {
+                    let resp =
+                        serde_json::to_string(&game_data.state.lock().unwrap().current).unwrap();
+                    nats.publish(reply, Bytes::from(resp)).await.unwrap();
+                }
 
-    rt.handle_event(
-        "guess-the-number".to_string(),
-        GameEvent {
-            data: data,
-            user: "user1".to_string(),
-            game: game.clone(),
-        },
-    )
-    .unwrap();
+                spawn_local(async move {
+                    while let Some(message) = subscription.next().await {
+                        // handle event
+                        let data: GameEventSerialized =
+                            serde_json::from_slice(&message.payload).unwrap();
 
-    let mut data = HashMap::new();
-    data.insert("number".to_string(), "5".to_string());
+                        let ev = GameEvent {
+                            data,
+                            game: game_data.clone(),
+                        };
 
-    rt.handle_event(
-        "guess-the-number".to_string(),
-        GameEvent {
-            data: data,
-            user: "user2".to_string(),
-            game: game.clone(),
-        },
-    )
-    .unwrap();
+                        rta.handle_event(game_type.clone(), ev).unwrap();
+                        if let Some(reply) = message.reply {
+                            let resp =
+                                serde_json::to_string(&game_data.state.lock().unwrap().current)
+                                    .unwrap();
+                            nats.publish(reply, Bytes::from(resp)).await.unwrap();
+                        }
 
-    let mut data = HashMap::new();
-    data.insert("number".to_string(), "0".to_string());
+                        if game_data
+                            .state
+                            .lock()
+                            .unwrap()
+                            .current
+                            .get("status")
+                            .unwrap()
+                            == "finished"
+                        {
+                            break;
+                        }
+                    }
 
-    rt.handle_event(
-        "guess-the-number".to_string(),
-        GameEvent {
-            data: data,
-            user: "user2".to_string(),
-            game: game.clone(),
-        },
-    )
-    .unwrap();
+                    subscription.unsubscribe().await.unwrap();
+                    info!("finished game {}", game_id);
+                });
+            }
+        })
+        .await;
 
-    let mut data = HashMap::new();
-    data.insert("number".to_string(), "0".to_string());
-
-    rt.handle_event(
-        "guess-the-number".to_string(),
-        GameEvent {
-            data: data,
-            user: "user1".to_string(),
-            game: game.clone(),
-        },
-    )
-    .unwrap();
+    Ok(())
 }
