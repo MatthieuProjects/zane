@@ -496,6 +496,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-nats",
+ "bytes",
  "criterion",
  "mlua",
  "serde",
@@ -707,6 +708,9 @@ dependencies = [
  "bstr",
  "cc",
  "erased-serde",
+ "futures-core",
+ "futures-task",
+ "futures-util",
  "lua-src",
  "luajit-src",
  "mlua_derive",

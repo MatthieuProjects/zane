@@ -102,6 +102,10 @@ export class Client extends undefinedClient {
   private transport: Transport;
   private api: API;
 
+  public get nats() {
+    return this.transport.nats;
+  }
+
   constructor(options: {
     rest?: Partial<RESTOptions>;
     transport: TransportOptions;

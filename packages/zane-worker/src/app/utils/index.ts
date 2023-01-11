@@ -13,6 +13,6 @@ export function generateLanguageMap(key: string | string[]): Record<string, stri
     if (locales.includes(language))
       languageMap[language] = i18next.t(key, { lng: language });
   }
-
+  console.log(languageMap)
   return languageMap;
 }

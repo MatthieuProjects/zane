@@ -1,1 +1,1 @@
-export * from "./rock-paper-scissors";
+export * from "./guess-the-number";

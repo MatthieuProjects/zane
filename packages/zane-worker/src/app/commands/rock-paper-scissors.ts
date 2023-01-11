@@ -14,10 +14,6 @@ import {
 } from 'discord-api-types/v10';
 import i18next from 'i18next';
 
-type Response = 'rock' | 'paper' | 'scissors';
-type State = { players: [string, string]; responses: Response[] };
-const states: Record<string, State> = {};
-
 const handler: ChatInputHandlerFn = async ({
   createCustomId,
   ...event
@@ -44,10 +40,24 @@ const handler: ChatInputHandlerFn = async ({
     };
   }
 
-  const gameId = ((Math.random() * 0xffffff) << 0)
+  // Allocate a gameid
+  const gameId = `${event.channel_id}${((Math.random() * 0xffffff) << 0)
     .toString(16)
-    .padStart(6, '0');
-  states[gameId] = { players: [opponent1.id, opponent2.id], responses: [] };
+    .padStart(6, '0')}`;
+
+  // Allocate a worker
+  const state = await event.client.nats.request(
+    'zane.matchmake.initialize',
+    Buffer.from(
+      JSON.stringify({
+        game_id: gameId,
+        game_type: 'guess-the-number',
+        users: [opponent1.id, opponent2.id],
+      })
+    )
+  );
+
+  const stateJSON = JSON.parse(state.data.toString());
 
   return {
     type: InteractionResponseType.ChannelMessageWithSource,
@@ -65,7 +75,7 @@ const handler: ChatInputHandlerFn = async ({
           components: [
             {
               type: ComponentType.StringSelect,
-              custom_id: createCustomId('input', gameId),
+              custom_id: createCustomId(stateJSON.status, gameId),
 
               options: [
                 {
@@ -90,13 +100,14 @@ const handler: ChatInputHandlerFn = async ({
 };
 
 const handleInput: ComponentHandlerFn = async (
-  { createCustomId, ...event },
+  { ...event },
   gameId
 ): Promise<APIInteractionResponse> => {
+  /*const client = event.client as Zane;
+
   const ctx = i18next.cloneInstance();
   ctx.changeLanguage(event.locale);
 
-  const game = states[gameId];
 
   const user = event.user || event.member.user;
   if (
@@ -171,14 +182,21 @@ const handleInput: ComponentHandlerFn = async (
         content: message,
       },
     };
-  }
+  }*/ return {
+    type: InteractionResponseType.ChannelMessageWithSource,
+    data: {
+      content: 'en maintenance',
+    },
+  };
 };
 
 i18next.loadNamespaces(['rock-paper-scissors']);
 
 export const rockPaperScisors = new CommandBuilder()
   .setChatInputHandler(handler)
-  .addComponentHandler('input', handleInput)
+  .addComponentHandler('waiting_for_number', handleInput)
+  .addComponentHandler('waiting_for_guesses', handleInput)
+  
   .setName('rock-paper-scissors')
   .setNameLocalizations(generateLanguageMap('rock-paper-scissors:name'))
   .setDescription(i18next.t('rock-paper-scissors:description'))

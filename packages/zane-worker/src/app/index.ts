@@ -6,12 +6,12 @@ import {
   registerCommands,
 } from '@zane/nova-client';
 import { APIUser, Routes } from 'discord-api-types/v10';
-import { rockPaperScisors } from './commands';
+import { guessTheNumber } from './commands';
 import { Logger, createLogger, format, transports } from 'winston';
 import { environment } from '../environments/environment.prod';
 
 export class Zane extends Client {
-  private commands: Command[] = [rockPaperScisors];
+  private commands: Command[] = [guessTheNumber];
   public logger: Logger = createLogger({
     level: environment.production ? 'info' : 'debug',
     transports: [new transports.Console({ format: format.colorize() })],

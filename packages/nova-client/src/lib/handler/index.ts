@@ -10,6 +10,7 @@ import {
   ApplicationCommandType,
   APIMessageComponentInteraction,
 } from 'discord-api-types/v10';
+import { WithIntrisics } from '../events';
 
 export * from './builder';
 
@@ -21,11 +22,11 @@ type WrappedUtils<T> = T & {
  * A simple function that executes a slash command.
  */
 export type ChatInputHandlerFn = (
-  data: WrappedUtils<APIChatInputApplicationCommandInteraction>
+  data: WrappedUtils<WithIntrisics<APIChatInputApplicationCommandInteraction>>
 ) => PromiseLike<APIInteractionResponse>;
 
 export type ComponentHandlerFn = (
-  event: WrappedUtils<APIMessageComponentInteraction>,
+  event: WrappedUtils<WithIntrisics<APIMessageComponentInteraction>>,
   state: string
 ) => PromiseLike<APIInteractionResponse>;
 
@@ -65,7 +66,7 @@ export const buildHandler = (commands: Iterable<Command>) => {
   }
 
   return async (
-    event: APIInteraction,
+    event: WithIntrisics<APIInteraction>,
     reply?: (data: APIInteractionResponse) => void
   ) => {
     if (
@@ -80,7 +81,7 @@ export const buildHandler = (commands: Iterable<Command>) => {
         const data = await command.chatInputHandler({
           ...event,
           createCustomId,
-        } as WrappedUtils<APIChatInputApplicationCommandInteraction>);
+        } as WrappedUtils<WithIntrisics<APIChatInputApplicationCommandInteraction>>);
 
         reply(data);
       }
@@ -119,7 +120,7 @@ const parseCustomId = (
     const [, command, name, state] = parse;
     return { name, command, state };
   } else {
-    console.log("failed parsing", customId, parse);
+    console.log('failed parsing', customId, parse);
     return null;
   }
 };

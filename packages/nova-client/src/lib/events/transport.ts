@@ -28,7 +28,7 @@ export type TransportOptions = {
  */
 export class Transport {
   // Nats connection
-  private nats: NatsConnection | undefined = null;
+  public nats: NatsConnection | undefined = null;
   // Current subscriptions
   private readonly subscriptions = new Map<string, Subscription>();
   // Current subscribed events
@@ -170,7 +170,7 @@ export class Transport {
           this.emitter.emit(camelCasedName, {
             ...event.d,
             client: this.emitter,
-          } as any);
+          } as unknown as any);
         }
       } catch (e) {
         console.log(e);

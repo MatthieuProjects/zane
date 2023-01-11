@@ -11,7 +11,7 @@
     "downlevelIteration": true,
     "esModuleInterop": true,
     "incremental": true,
-    "target": "es2015",
+    "target": "ES2021",
     "module": "esnext",
     "baseUrl": ".",
     "paths": {
